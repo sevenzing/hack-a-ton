@@ -1,4 +1,6 @@
 const TonWeb = require("tonweb");
+const { sleep, try_until_success } = require("./utils");
+
 const { SEED_BASE64, PUBLIC_RPC_URL, API_KEY } = require("./config");
 const BN = TonWeb.utils.BN;
 const toNano = TonWeb.utils.toNano;
@@ -18,9 +20,7 @@ const init = async () => {
 }
 init()
 
-
-
-const deploy_contract = async (client_public_key, initial_balance, channel_id = Math.floor(Math.random() * 10000000)) => {
+const deploy_channel = async (client_public_key, initial_balance, channel_id = Math.floor(Math.random() * 10000000)) => {
     const client_wallet = tonweb.wallet.create({
         publicKey: client_public_key
     })
@@ -34,7 +34,7 @@ const deploy_contract = async (client_public_key, initial_balance, channel_id = 
         initBalanceA: state.balanceA,
         initBalanceB: state.balanceB
     }
-    console.log('deploy contact: channel config =', channelConfig)
+    //console.log('deploy contact: channel config =', channelConfig)
     const channel = tonweb.payments.createChannel({
         ...channelConfig,
         isA: true,
@@ -43,16 +43,64 @@ const deploy_contract = async (client_public_key, initial_balance, channel_id = 
     })
     const channelAddress = await channel.getAddress();
     console.log("channel address", channelAddress.toString(true, true, true))
-    const fromWallet = channel.fromWallet({
+    console.log('start deploy')
+    const tx = await W(channel).deploy().send(toNano('0.05'));
+    console.log('deploy tx =', tx)
+    return channel
+}
+
+const init_channel = async (channel, initial_balance, client_wallet, client_private_key) => {
+    const state = get_initial_state(initial_balance)
+
+    const client_from_wallet = channel.fromWallet({
+        wallet: client_wallet,
+        secretKey: client_private_key // key_pair.secretKey
+    })
+
+    let seqno = await client_wallet.methods.seqno().call()
+    await client_from_wallet
+        .topUp({coinsA: new BN(0), coinsB: state.balanceB})
+        .send(state.balanceB.add(toNano('0.05')))
+    await try_until_success(async() => {
+        let new_seqno = await client_wallet.methods.seqno().call()
+        if (new_seqno != seqno) {
+            return true
+        }
+    }, 'top up from client account')
+
+
+    seqno = await wallet.methods.seqno().call()
+    let tx = await W(channel).init().send(toNano('0.05'))
+    await try_until_success(async() => {
+        let new_seqno = await wallet.methods.seqno().call()
+        if (new_seqno != seqno) {
+            return true
+        }
+    }, 'init channel')
+
+    await try_until_success(async () => {
+        let status = await get_channel_state(channel)
+        if (status != 0) {
+            return true
+        }
+    }, 'get non-zero channel status')
+    return tx
+}
+
+
+const W = (channel) => {
+    return channel.fromWallet({
         wallet: wallet,
         secretKey: key_pair.secretKey
     })
-    console.log('start deploy')
-    const tx = await fromWallet.deploy().send(toNano('0.05'));
-    console.log('deploy tx =', tx)
-    return (tx, channel)
 }
 
+
+const get_channel_state = async (channel) => {
+    return await try_until_success(async () => {
+        return await channel.getChannelState()
+    }, 'get channel state')
+}
 
 
 
@@ -67,5 +115,6 @@ const get_initial_state = (initial_balance) => {
 
 module.exports = {
     tonweb, key_pair, wallet, wallet_address,
-    deploy_contract, toNano, BN
+    deploy_channel, get_channel_state,
+    toNano, BN, init_channel
 }
