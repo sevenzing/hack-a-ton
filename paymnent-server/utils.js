@@ -8,7 +8,7 @@ const try_until_success = async (job, job_name, times = 20, sleep_time=1000) => 
     for (let index = 0; index < times; index++) {
         let v = await job()
             .catch((e) => {
-                console.log("cannot ",job_name,". attempt #", index)
+                console.log("attemt#", index, ". error!", "job name = ", job_name)
             })
         if (v != undefined) {
             console.log('job', job_name, 'finished with result =', v)

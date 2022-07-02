@@ -6,12 +6,12 @@ const BN = TonWeb.utils.BN;
 const toNano = TonWeb.utils.toNano;
 
 
-let tonweb, key_pair, wallet, wallet_address;
+let tonweb, key_pair, wallet, wallet_address, WalletClass;
 const init = async () => {
 
     const apiKey = API_KEY; 
     tonweb = new TonWeb(new TonWeb.HttpProvider(PUBLIC_RPC_URL, {apiKey}));
-
+    WalletClass = tonweb.wallet.all.v3R2;
     key_pair = tonweb.utils.keyPairFromSeed(TonWeb.utils.base64ToBytes(SEED_BASE64))
     wallet = tonweb.wallet.create({
         publicKey: key_pair.publicKey
@@ -19,23 +19,36 @@ const init = async () => {
     wallet_address = await wallet.getAddress();
 }
 init()
+sleep(50)
 
-//Math.floor(Math.random() * 10000000)
-const deploy_channel = async (client_public_key, initial_balance, channel_id) => {
-    const client_wallet = tonweb.wallet.create({
-        publicKey: client_public_key
+
+const start_channel = async (client_seed, initial_value, channel_id) => {
+    let [client_key, client_wallet, client_public_key, client_wallet_address] = await get_cridentials(client_seed)
+    console.log("start contract. address A:", ADDR(wallet_address), ", address B: ", ADDR(client_wallet_address))
+
+    const [channel, channel_config] = await deploy_channel(client_public_key, client_wallet_address, initial_value, channel_id).catch((reason) => {
+        console.log("DEPLOY ERROR:", reason)
     })
-    const client_address = await client_wallet.getAddress()
-    
+    let status = await get_channel_state(channel)
+    console.log("status of channel is", status)
+    if (status == 0) {
+        await topup_channel(channel, client_wallet, client_key.secretKey, initial_value)
+        await init_channel(channel, initial_value)
+        return await get_channel_state(channel)
+    }
+    return status
+}
+
+
+const deploy_channel = async (client_public_key, client_wallet_address, initial_balance, channel_id) => {    
     const state = get_initial_state(initial_balance)
     const channel_config = {
         channelId: new BN(channel_id),
         addressA: wallet_address,
-        addressB: client_address,
+        addressB: client_wallet_address,
         initBalanceA: state.balanceA,
         initBalanceB: state.balanceB
     }
-    //console.log('deploy contact: channel config =', channelConfig)
     const channel = tonweb.payments.createChannel({
         ...channel_config,
         isA: true,
@@ -49,7 +62,6 @@ const deploy_channel = async (client_public_key, initial_balance, channel_id) =>
     console.log('deploy tx =', tx)
     return [channel, channel_config]
 }
-
 
 
 const init_channel = async (channel, initial_balance) => {
@@ -91,25 +103,43 @@ const topup_channel = async(channel, client_wallet, client_private_key, amount_n
 }
 
 
-const close_channel = async(channel, client_key, channel_config, initial_balance, current_balance) => {
+const close_channel = async(client_seed, initial_balance, current_balance, channel_id) => {
+    let [client_key, client_wallet, client_public_key, client_wallet_address] = await get_cridentials(client_seed)
+
+    const initial_state = get_initial_state(initial_balance)
     const final_state = get_final_state(initial_balance, current_balance)
-    console.log(final_state.balanceA.toString(), final_state.balanceB.toString())
-    // sign
+    
+    // create channel
+    const channel_config = {
+        channelId: new BN(channel_id),
+        addressA: wallet_address,
+        addressB: client_wallet_address,
+        initBalanceA: initial_state.balanceA,
+        initBalanceB: initial_state.balanceB
+    }
+    const channel = tonweb.payments.createChannel({
+        ...channel_config,
+        isA: true,
+        myKeyPair: key_pair,
+        hisPublicKey: client_public_key,
+    })
     const channel_client = tonweb.payments.createChannel({
         ...channel_config,
         isA: false,
         myKeyPair: client_key,
         hisPublicKey: key_pair.publicKey,
     });
-
-    if ((await channel_client.getAddress()).toString() !== (await channel.getAddress()).toString()) {
+    const channel_client_address = ADDR(await channel_client.getAddress())
+    const channel_address = ADDR(await channel.getAddress())
+    if (ADDR(channel_client_address) !== ADDR(channel_address)) {
         throw new Error('Channels address not same');
     }
 
+    // sign
     const client_signature = await channel_client.signClose(final_state);
 
     // check sign
-    if (!(await channel.verifyState(final_state, client_signature))) { 
+    if (!(await channel.verifyClose(final_state, client_signature))) { 
         throw new Error("signature is not valid")
     }
 
@@ -119,12 +149,14 @@ const close_channel = async(channel, client_key, channel_config, initial_balance
         hisSignature: client_signature
     }).send(toNano('0.05'));
 
-    return await try_until_success(async() => {
+    await try_until_success(async() => {
         let new_seqno = await wallet.methods.seqno().call()
         if (new_seqno != seqno) {
             return true
         }
     }, 'close contract')
+
+    console.log("final channel status: ", await get_channel_state(channel))
 }
 
 
@@ -135,6 +167,19 @@ const W = (channel) => {
     })
 }
 
+const ADDR = (addr) => {
+    return addr.toString(true, true, true)
+}
+
+const get_cridentials = async (seed) => {
+    const key_pair = tonweb.utils.keyPairFromSeed(seed)
+    const public_key = key_pair.publicKey;
+    const wallet = new WalletClass(tonweb.provider, {
+        publicKey: public_key
+    });
+    const wallet_address = await wallet.getAddress();
+    return [key_pair, wallet, public_key, wallet_address]
+}
 
 const get_channel_state = async (channel) => {
     return await try_until_success(async () => {
@@ -162,6 +207,6 @@ const get_final_state = (initial_balance, current_balance) => {
 
 module.exports = {
     tonweb, key_pair, wallet, wallet_address,
-    deploy_channel, get_channel_state, topup_channel, close_channel,
+    start_channel, close_channel,
     toNano, BN, init_channel
 }

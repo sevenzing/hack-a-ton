@@ -1,44 +1,19 @@
 const TonWeb = require("tonweb");
 const tonMnemonic = require("tonweb-mnemonic");
 
-const {deploy_channel, init_channel, get_channel_state, tonweb, toNano, BN, wallet, topup_channel, close_channel} = require("./blockchain");
-const { sleep } = require("./utils");
-
-const WalletClass = tonweb.wallet.all.v3R2
-
-// let client_key = tonweb.utils.keyPairFromSeed(TonWeb.utils.base64ToBytes('YmJvYnVzYWpzZGFpa2RucWlkc25hbHdkaWFqd29kYXc='))
-// let client_public_key = client_key.publicKey;
-// let client_wallet = tonweb.wallet.create({publicKey: client_public_key});
-
-// words is recovery phrases (mnemonics) of the wallet
-
+const {toNano, BN, close_channel, start_channel} = require("./blockchain");
 
 const main = async () => {
     const seed = await tonMnemonic.mnemonicToSeed(['wagon', 'expect', 'entry', 'wrong', 'sock', 'crouch', 'lawsuit', 'screen', 'off', 'result', 'busy', 'general', 'develop', 'into', 'man', 'differ', 'enact', 'oxygen', 'armor', 'tip', 'canyon', 'siege', 'arch', 'topic']);
+    const INITIAL = toNano('10')
 
-    let client_key = tonweb.utils.keyPairFromSeed(seed)
-    let client_public_key = client_key.publicKey;
-    const client_wallet = new WalletClass(tonweb.provider, {
-        publicKey: client_public_key
-    });
-    console.log("OUR ADDRESS: ", (await wallet.getAddress()).toString(true, true, true))
-    console.log("CLIENT ADDRESS: ", (await client_wallet.getAddress()).toString(true, true, true))
-    
-    const INITIAL = toNano('0.1')
-    const [channel, channel_config] = await deploy_channel(client_public_key, INITIAL, 20).catch((reason) => {
-        console.log("DEPLOY ERROR:", reason)
-        return
-    })
+    let channel_id = 34; // should be unique for every user!
+    await start_channel(seed, INITIAL, channel_id)
 
-    let status = await get_channel_state(channel)
-    console.log("status of channel is", status)
-    if (status == 0) {
-        await topup_channel(channel, client_wallet, client_key.secretKey, INITIAL)
-        await init_channel(channel, INITIAL)
-        await sleep(1000)
-        console.log(await get_channel_state(channel))
-    }
-    await close_channel(channel, client_key, channel_config, INITIAL, INITIAL.div(new BN(2)))
-    console.log("status of channel is", await get_channel_state(channel))
+    // balance change 
+    // ...
+
+    let new_balance = INITIAL.div(new BN(2))
+    await close_channel(seed, INITIAL, new_balance, channel_id)
 }
 main()
