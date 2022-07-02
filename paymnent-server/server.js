@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 
+const {toNano, BN, close_channel, start_channel} = require("./blockchain");
+
 const app = express()
 const port = 3000
 
@@ -58,10 +60,14 @@ function get_auth_key(req, res) {
   try {
     let tg_id = req.body.telegram_id;
 
+    let auth_token = (Math.round(Math.random() * 0xfffff * 1000000)).toString(16);
+    
+    // console.log(auth_token);
     // try to start poolling user with tg_id
+    // start_channel(seed, INITIAL, channel_id);
 
     // balancer is on here
-    res.status(200).json({result:"ok", url:"https://google.com", auth_key:"lalala"});
+    res.status(200).json({result:"ok", url:"https://google.com", auth_key:auth_token});
   
   } catch (err) {
     console.log(err.message);
@@ -118,8 +124,9 @@ function info(req, res) {
 
 function tick(req, res) {
   try {
-    let tg_id = req.body.telegram_id;
+    let tg_id = req.body.access_key;
 
+    // find user by access_key and change balance
     res.status(200).json({result:"ok"});
   } catch (err) {
     console.log(err.message);
