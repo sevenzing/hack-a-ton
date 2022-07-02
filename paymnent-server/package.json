@@ -1,11 +1,11 @@
 {
   "dependencies": {
+    "express": "^4.18.1",
     "tonweb": "^0.0.50"
   },
   "name": "hack_a_ton",
   "version": "1.0.0",
   "main": "source.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
