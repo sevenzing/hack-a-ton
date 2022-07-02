@@ -1,4 +1,3 @@
-from tracemalloc import Statistic
 import telebot
 import requests
 
@@ -27,8 +26,10 @@ def send_welcome(message):
         my_bot.register_next_step_handler(msg, get_private_key)
     elif result == 'true':
         # user exist
-        print("user exist")
-        msg = my_bot.send_message(message.chat.id, text="I found you in our database")
+        my_bot.send_message(message.chat.id, text=f"I found your account in database! Our pricing:\n1 request = {price}")
+        msg = my_bot.send_message(message.chat.id, text="Please, text how much TON you want to spend\ne.g.:0.1")
+        my_bot.register_next_step_handler(msg, get_prices)
+
 
 
 def get_private_key(message):
@@ -73,7 +74,7 @@ def get_auth_key(message):
 
 
     if r.status_code != 200:
-        my_bot.send_message(message.chat.id, text="Всё хуёво", parse_mode='Markdown')
+        my_bot.send_message(message.chat.id, text="DB throw error :(", parse_mode='Markdown')
         return
 
     json = r.json() 
@@ -97,7 +98,6 @@ def finish(message):
                        data={'telegram_id': user_id})
 
     info = r.json()
-    statistics = {"ton":"pizdec"}
     my_bot.send_message(message.chat.id, text=f"Tnanks! Statiscis: {info}")
     my_bot.send_message(message.chat.id, text=f"type /start to restart")
 
@@ -111,3 +111,15 @@ def info(message):
 
     info = r.json()
     my_bot.send_message(message.chat.id, text=f"Statiscis: {info}")
+
+
+@my_bot.message_handler(commands=['help'])
+def help(message):
+    # get statistics
+    my_bot.send_message(message.chat.id,
+                        text="""This bot created to provide developers possibility
+of using ***private rpc nodes*** easier.\n
+In our project we are using [Payment Channels](https://telegra.ph/TON-Payments-07-01)
+for the convenience of working with rpc nodes.\n
+Comands:\n/start - Start\n/help - Help\n/finish - Finish
+/info - Get statistics while processing""", parse_mode="Markdown")

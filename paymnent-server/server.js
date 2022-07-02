@@ -1,8 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 
-const {toNano, BN, close_channel, start_channel} = require("./blockchain");
-
+// const {toNano, BN, close_channel, start_channel} = require("./blockchain");
 const app = express()
 const port = 3000
 
@@ -64,7 +63,7 @@ function get_auth_key(req, res) {
     
     // console.log(auth_token);
     // try to start poolling user with tg_id
-    // start_channel(seed, INITIAL, channel_id);
+    // start_channel()
 
     // balancer is on here
     res.status(200).json({result:"ok", url:"https://google.com", auth_key:auth_token});
