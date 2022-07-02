@@ -20,6 +20,8 @@ app.post('/api/info', info);
 
 app.post('/api/finish', close);
 
+app.post('/api/tick', tick);
+
 app.listen(port, () => {
   console.log(`Started server at http://localhost:${port}`);
 });
@@ -108,6 +110,17 @@ function info(req, res) {
     let num_of_req = 5;
 
     res.status(200).json({result:"ok",num_of_req:num_of_req, money_spent:money_spent });
+  } catch (err) {
+    console.log(err.message);
+    res.sendStatus(400);
+  }
+}
+
+function tick(req, res) {
+  try {
+    let tg_id = req.body.telegram_id;
+
+    res.status(200).json({result:"ok"});
   } catch (err) {
     console.log(err.message);
     res.sendStatus(400);
