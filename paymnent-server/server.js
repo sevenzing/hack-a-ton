@@ -74,7 +74,7 @@ function save_user_in_db_query(telegram_id, private_key) {
   let connStr = 'postgresql://postgres:postgres@localhost:' + db_port + '/pg_db';
   client.connectSync(connStr);
   try {
-      client.querySync('insert into rpc_db.user values (\'' + telegram_id + '\', \'' + private_key + '\')');
+      client.querySync('insert into rpc_db.user values (\'' + telegram_id + '\', null, \'' + private_key + '\')');
   } catch(err) {
       console.log(err.message);
   }
