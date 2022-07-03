@@ -9,9 +9,9 @@ Here we found a use of payment channel. User will pay for each requests he send 
 It can be useful for some developers who need to make just few requests and this payment method more comfortable for them.
 
 ### What we have done:
-We developed app for paying for each request you made to node.
+We developed sservice for paying for each request you made to node.
 
-We use tg bot as an interface for registration and payment, backend js server for opening payment channels and saving data, balancer for capturing traffic to node.
+We use telegram bot as an interface for registration and payment, backend js server for opening payment channels and saving data, balancer for capturing traffic to node.
 
 ### You can see our video demonstration here:
 https://drive.google.com/file/d/1mdVsicpQbWNE1Dfwsq8LdOe42PYrknao/view?usp=sharing
