@@ -20,7 +20,7 @@ Your url is:
 
 Add your auth token to url like that:
 
-`curl {url} -H "Authorization: {auth_token}"`
+`curl {url}/api/v2/getConsensusBlock -H "Authorization: {auth_token}"`
 """
 
 
