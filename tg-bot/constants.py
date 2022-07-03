@@ -8,7 +8,6 @@ MSG_GET_PRICE = "Please, text what is the maximum number of TONS you want to spe
 MSG_ERROR = "Something went wrong, please send feedback to @YaStepan\n\n%s"
 
 MSG_SUCCESS = "All is good!"
-MSG_INIT_BALANCE = "Please, text how much TON you want to spend\ne.g.:0.1"
 MSG_TYPE_FINISH = "*Type* /finish then you wanna `close contract`"
 MSG_RESTART = "Type /start to restart"
 MSG_WAIT = "Ok! Contract deployment and transaction sending may take a while, please wait about 1 minute"

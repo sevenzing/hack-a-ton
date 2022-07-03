@@ -50,7 +50,7 @@ def get_private_key(message):
 
     my_bot.send_message(message.chat.id, text=MSG_SUCCESS)
     my_bot.send_message(message.chat.id, text=MSG_PRICING(price))
-    msg = my_bot.send_message(message.chat.id, text=MSG_INIT_BALANCE)
+    msg = my_bot.send_message(message.chat.id, text=MSG_GET_PRICE)
     my_bot.register_next_step_handler(msg, get_prices)
 
 
