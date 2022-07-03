@@ -92,7 +92,7 @@ async function get_auth_key(req, res) {
       db.set_active_by_tg_id(tg_id, true)
       db.set_channel_by_tg_id(tg_id, channel_id)
       let contract_address = (await channel.getAddress()).toString(true, true, true)
-      res.status(200).json({result:"ok", url:"https://google.com", auth_key, contract_address})
+      res.status(200).json({result:"ok", url: config.PRIVATE_RPC_URL, auth_key, contract_address})
     } else {
       res.status(400).json({result: "error", "error": "Cannot create channel"})
       return
