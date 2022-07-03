@@ -7,7 +7,7 @@ const main = async () => {
     const seed = await tonMnemonic.mnemonicToSeed(['wagon', 'expect', 'entry', 'wrong', 'sock', 'crouch', 'lawsuit', 'screen', 'off', 'result', 'busy', 'general', 'develop', 'into', 'man', 'differ', 'enact', 'oxygen', 'armor', 'tip', 'canyon', 'siege', 'arch', 'topic']);
     const INITIAL = toNano('10')
 
-    let channel_id = 34; // should be unique for every user!
+    let channel_id = 1; // should be unique for every user!
     await start_channel(seed, INITIAL, channel_id)
 
     // balance change 

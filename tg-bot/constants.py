@@ -2,23 +2,31 @@
 
 MSG_WELCOME = "Hi!\nThis bot created for easier use private rpc nodes with Payment channels!"
 MSG_SECRET_KEY = "Please, text your secret phraze\n(words in order with separated by a spaces)"
-MSG_FOUND_DB = "I found your account in database!"
+MSG_FOUND_DB = "Glad to see you again!"
 
 MSG_GET_PRICE = "Please, text how much TON you want to spend\ne.g.:0.1"
-MSG_ERROR = "Something went wrong, please send feedback to @YaStepan"
+MSG_ERROR = "Something went wrong, please send feedback to @YaStepan\n\n%s"
+
 MSG_SUCCESS = "All is good!"
 MSG_INIT_BALANCE = "Please, text how much TON you want to spend\ne.g.:0.1"
 MSG_TYPE_FINISH = "*Type* /finish then you wanna `close contract`"
 MSG_RESTART = "Type /start to restart"
+MSG_WAIT = "Ok! Contract deployment and transaction sending may take a while, please wait about 1 minute"
+def MSG_DEPLOYMENT_DONE(contract_address, auth_token, url):
+    return f"""Nice! Contract was deployed at `{contract_address}`
+Your auth token is:
+`{auth_token}`
+Your url is:
+`{url}`
 
-def MSG_AUTH_TOKEN(auth_token):
-    return f"***Nice!***\nYour auth token is:\n`{auth_token}`"
+Add your auth token to url like that:
 
-def MSG_USE_URL(url):
-    return f"Use this url: {url}"
+`curl {url} -H "Authorization: {auth_token}"`
+"""
 
-def MSG_STATISTICS(info):
-    return f"Statiscis: {info}"
+
+def MSG_STATISTICS(money_spent, money_left, num_of_req, active):
+    return f"Statiscis:\n\nIs active: {active}\nNumber of requests: `{num_of_req}`\nMoney spent: {money_spent} TON\nMoney left: {money_left} TON"
 
 def MSG_PRICING(price):
     return f"Our pricing:\n{price} TON per request"

@@ -25,7 +25,8 @@ sleep(50)
 const start_channel = async (client_seed, initial_value, channel_id) => {
     let [client_key, client_wallet, client_public_key, client_wallet_address] = await get_cridentials(client_seed)
     console.log("start contract. address A:", ADDR(wallet_address), ", address B: ", ADDR(client_wallet_address))
-
+    console.log("initial_value: ", initial_value, initial_value.toString())
+    console.log("channelId", channel_id)
     const [channel, channel_config] = await deploy_channel(client_public_key, client_wallet_address, initial_value, channel_id).catch((reason) => {
         console.log("DEPLOY ERROR:", reason)
     })
@@ -34,9 +35,9 @@ const start_channel = async (client_seed, initial_value, channel_id) => {
     if (status == 0) {
         await topup_channel(channel, client_wallet, client_key.secretKey, initial_value)
         await init_channel(channel, initial_value)
-        return await get_channel_state(channel)
+        status = await get_channel_state(channel)
     }
-    return status
+    return [status, channel]
 }
 
 
@@ -134,8 +135,10 @@ const close_channel = async(client_seed, initial_balance, current_balance, chann
     if (ADDR(channel_client_address) !== ADDR(channel_address)) {
         throw new Error('Channels address not same');
     }
+    console.log('closing channel with addr', channel_address)
 
     // sign
+    console.log("final balances are: ",final_state.balanceA.toString(), final_state.balanceB.toString())
     const client_signature = await channel_client.signClose(final_state);
 
     // check sign
@@ -155,8 +158,9 @@ const close_channel = async(client_seed, initial_balance, current_balance, chann
             return true
         }
     }, 'close contract')
-
-    console.log("final channel status: ", await get_channel_state(channel))
+    let status = await get_channel_state(channel)
+    console.log("final channel status: ", status)
+    return status
 }
 
 

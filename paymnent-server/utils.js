@@ -3,7 +3,7 @@ const sleep = (milliseconds) => {
 }
 
 
-const try_until_success = async (job, job_name, times = 20, sleep_time=1000) => {
+const try_until_success = async (job, job_name, times = 40, sleep_time=1000) => {
     console.log("start job with name = ", job_name)
     for (let index = 0; index < times; index++) {
         let v = await job()

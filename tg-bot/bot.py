@@ -40,10 +40,11 @@ def get_private_key(message):
     # save info into db
     r = requests.post(f"http://localhost:{port}/api/save-user-in-db",
                        data={'telegram_id': user_id, 'private_key': message.text})
-    result = r.json()['result']
+    data = r.json()
+    result = data['result']
 
     if result != 'ok':
-        my_bot.send_message(message.chat.id, text=MSG_ERROR)
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % data.get('error'))
         return
 
 
@@ -56,13 +57,19 @@ def get_private_key(message):
 def get_prices(message):
     user_id = message.from_user.id
     deposit = message.text
+    try:
+        int(deposit)
+    except ValueError:
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % 'invalid number')
+        return
     # update db with deposit
     r = requests.post(f"http://localhost:{port}/api/init-user-balance",
                        data={'telegram_id': user_id, 'balance': deposit})
-    result = r.json()['result']
+    data = r.json()
+    result = data['result']
 
     if result != 'ok':
-        my_bot.send_message(message.chat.id, text=MSG_ERROR)
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % data.get('error'))
         return
 
     get_auth_key(message)
@@ -71,36 +78,49 @@ def get_prices(message):
 def get_auth_key(message):
     user_id = message.from_user.id
     # get auth token + ref
+    my_bot.send_message(message.chat.id, text=MSG_WAIT, parse_mode='Markdown')
+    my_bot.send_chat_action(message.chat.id, "typing")
 
     r = requests.post(f"http://localhost:{port}/api/get_auth_key",
                        data={'telegram_id': user_id})
     if r.status_code != 200:
-        my_bot.send_message(message.chat.id, text=MSG_ERROR)
+        error = ''
+        try:
+            error = r.json().get('error')
+        except:
+            pass
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % error)
         return
 
     json = r.json() 
     url = json['url']
     auth_token = json['auth_key']
+    contract_address = json.get('contract_address')
 
-    my_bot.send_chat_action(message.chat.id, "typing")
-    my_bot.send_message(message.chat.id, text=MSG_AUTH_TOKEN(auth_token), parse_mode='Markdown')
-    my_bot.send_message(message.chat.id, text=MSG_USE_URL(url))
+    text = MSG_DEPLOYMENT_DONE(contract_address, auth_token, url)
+    my_bot.send_message(message.chat.id, text=text, parse_mode='Markdown')
     my_bot.send_message(message.chat.id, text=MSG_TYPE_FINISH, parse_mode='Markdown')
 
 
 @my_bot.message_handler(commands=['finish'])
 def finish(message):
     user_id = message.from_user.id
-    # throw finish into back
-    # get statistics?
+    
+    my_bot.send_message(message.chat.id, text=MSG_WAIT)
+
     r = requests.post(f"http://localhost:{port}/api/finish",
                        data={'telegram_id': user_id})
     if r.status_code != 200:
-        my_bot.send_message(message.chat.id, text=MSG_ERROR)
+        error = ''
+        try:
+            error = r.json().get('error')
+        except:
+            pass
+
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % error)
         return
 
-    info = r.json()
-    my_bot.send_message(message.chat.id, text=MSG_STATISTICS(info))
+    info(message)
     my_bot.send_message(message.chat.id, text=MSG_RESTART)
 
 
@@ -111,11 +131,20 @@ def info(message):
     r = requests.post(f"http://localhost:{port}/api/info",
                        data={'telegram_id': user_id})
     if r.status_code != 200:
-        my_bot.send_message(message.chat.id, text=MSG_ERROR)
+        error = ''
+        try:
+            error = r.json().get('error')
+        except:
+            pass
+        my_bot.send_message(message.chat.id, text=MSG_ERROR % error)
         return
 
     info = r.json()
-    my_bot.send_message(message.chat.id, text=MSG_STATISTICS(info))
+    money_spent = info.get('money_spent')
+    money_left = info.get('money_left')
+    num_of_req = info.get('num_of_req')
+    active = info.get('active')
+    my_bot.send_message(message.chat.id, text=MSG_STATISTICS(money_spent, money_left, num_of_req, active), parse_mode='Markdown')
 
 
 @my_bot.message_handler(commands=['help'])
