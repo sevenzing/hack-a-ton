@@ -67,14 +67,29 @@ function check_user_in_db(req, res) {
   }
 }
 
+
+
+function save_user_in_db_query(telegram_id, private_key) {
+  const client = new Client()
+  let connStr = 'postgresql://postgres:postgres@localhost:' + db_port + '/pg_db';
+  client.connectSync(connStr);
+  try {
+      client.querySync('insert into rpc_db.user values (\'' + telegram_id + '\', \'' + private_key + '\')');
+  } catch(err) {
+      console.log(err.message);
+  }
+  client.end();
+  return result;
+}
+
 function save_user_in_db(req, res) {
   try {
     // save user
     console.log(req.body.telegram_id);
     console.log(req.body.private_key);
-  
+    save_user_in_db_query(req.body.telegram_id, req.body.private_key);
     res.status(200).json({result:"ok"});
-  
+
   } catch (err) {
     console.log(err.message);
     res.sendStatus(400);
