@@ -32,6 +32,11 @@ def send_welcome(message):
 
 def get_private_key(message):
     user_id = message.from_user.id
+
+    if len(message.text.split(' ')) != 24:
+        msg = my_bot.send_message(message.chat.id, text="Please, try again")
+        my_bot.register_next_step_handler(msg, get_private_key)
+        return
     # save info into db
     r = requests.post(f"http://localhost:{port}/api/save-user-in-db",
                        data={'telegram_id': user_id, 'private_key': message.text})
@@ -78,8 +83,6 @@ def get_auth_key(message):
     auth_token = json['auth_key']
 
     my_bot.send_chat_action(message.chat.id, "typing")
-    # because of typing
-    sleep(1.5)
     my_bot.send_message(message.chat.id, text=MSG_AUTH_TOKEN(auth_token), parse_mode='Markdown')
     my_bot.send_message(message.chat.id, text=MSG_USE_URL(url))
     my_bot.send_message(message.chat.id, text=MSG_TYPE_FINISH, parse_mode='Markdown')

@@ -1,6 +1,6 @@
 create schema rpc_db;
 
-drop table if exists rpc_db.users;
+drop table if exists rpc_db.user;
 create table rpc_db.user
 (
     telegram_id varchar(255),

@@ -8,6 +8,7 @@ function check_is_tg_id_exists(telegram_id) {
     let result = true;
     try {
         res = client.querySync('SELECT COUNT(1) FROM rpc_db.user WHERE telegram_id = \'' + telegram_id + '\'');
+        console.log(res[0].count);
         if (res[0].count == 0) {
             result = false;
         }

@@ -1,7 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 
-// const {toNano, BN, close_channel, start_channel} = require("./blockchain");
+const tonMnemonic = require("tonweb-mnemonic");
+
+const {toNano, BN, close_channel, start_channel} = require("./blockchain");
 const app = express()
 const port = 3000
 
@@ -34,8 +36,10 @@ function check_user_in_db(req, res) {
     // check if user exist in db
     console.log("New user with tg_id=" + req.body.telegram_id);
     if (db.check_is_tg_id_exists(req.body.telegram_id)) {
+      console.log("this user exist");
       res.status(200).json({result:"true"});
     } else {
+      console.log("new user");
       res.status(200).json({result:"false"});
     }
     // res.sendStatus(200);
@@ -50,8 +54,10 @@ function save_user_in_db(req, res) {
     // save user
     console.log(req.body.telegram_id);
     console.log(req.body.private_key);
+    db.add_telegram_id(req.body.telegram_id);
     db.set_private_key_by_tg_id(req.body.telegram_id, req.body.private_key);
-    db.set_active_by_tg_id(req.body.telegram_id, false);
+    // db.set_active_by_tg_id(req.body.telegram_id, false);
+    
     res.status(200).json({result:"ok"});
 
   } catch (err) {
@@ -60,12 +66,20 @@ function save_user_in_db(req, res) {
   }
 }
 
-function get_auth_key(req, res) {
+async function get_auth_key(req, res) {
   try {
     let tg_id = req.body.telegram_id;
+    let balance = req.body.balance;
 
     let auth_token = (Math.round(Math.random() * 0xfffff * 1000000)).toString(16);
-    
+
+    let data = db.get_info_by_tg_id(tg_id);
+    let private_key = data.private_key;
+    let init
+
+    let seed = await tonMnemonic.mnemonicToSeed(private_key.split(' '));
+    // console.log(seed);
+    // start_channel(seed, balance, )
     // db.set_auth_key_by_tg_id(tg_id, auth_token);
     // db.set_active_by_tg_id(tg_id, true);
 
