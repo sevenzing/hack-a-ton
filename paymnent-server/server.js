@@ -83,7 +83,7 @@ async function get_auth_key(req, res) {
     let balance = data.initial_balance
     
     let seed = await tonMnemonic.mnemonicToSeed(private_key.split(' '))
-    let channel_id = 5
+    let channel_id = Math.floor(1 + Math.random() * 1000000000000)
     let [channel_status, channel] = await start_channel(seed, new BN(balance), channel_id)
 
     if (channel_status == 1) {
@@ -112,7 +112,7 @@ async function close(req, res) {
     let initial_balance = data.initial_balance
     let current_balance = data.current_balance
     let private_key = data.private_key
-    let channel_id = data.channel_id || 1
+    let channel_id = data.channel_id
     let seed = await tonMnemonic.mnemonicToSeed(private_key.split(' '))
     let status = await close_channel(seed, new BN(initial_balance), new BN(current_balance), channel_id)
     if (status == 0) {
