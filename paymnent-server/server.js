@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const uuid = require("UUID")
+const uuid = require("uuid")
 const tonMnemonic = require("tonweb-mnemonic")
 const config = require('./config')
 const TonWeb = require("tonweb");
