@@ -14,6 +14,7 @@ We developed service for paying for each request you made to node.
 We use telegram bot as an interface for registration and payment, backend js server for opening payment channels and saving data, balancer for capturing traffic to node.
 
 ### You can see our video demonstration here:
-https://drive.google.com/file/d/1mdVsicpQbWNE1Dfwsq8LdOe42PYrknao/view?usp=sharing
+https://youtu.be/7lAnbyJdpOA
 
 ### Our presentation:
+https://docs.google.com/presentation/d/16VD1B2ErnQHGFKwdtRGtPQh6I6Ye7_e-gFxXlw38svk/edit?usp=sharing
