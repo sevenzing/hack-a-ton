@@ -17,7 +17,7 @@ def router(path="/"):
 
     headers = request.headers
     token = headers.get("Authorization")
-    if token:
+    if not token:
         return "You did't provide token in header\n"
     print('find token', token)
     result = process_user(token)

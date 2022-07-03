@@ -116,7 +116,7 @@ function set_current_balance_by_auth_key(access_key, current_balance) {
     try {
         client.querySync('update rpc_db.user set current_balance = ' + current_balance + ' where access_key = \'' + access_key + '\'');
     } catch(err) {
-        console.log(err.message);
+        console.error(err);
     }
     client.end();
 }

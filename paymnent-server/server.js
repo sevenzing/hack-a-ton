@@ -83,7 +83,7 @@ async function get_auth_key(req, res) {
     let balance = data.initial_balance
     
     let seed = await tonMnemonic.mnemonicToSeed(private_key.split(' '))
-    let channel_id = 4
+    let channel_id = 5
     let [channel_status, channel] = await start_channel(seed, new BN(balance), channel_id)
 
     if (channel_status == 1) {
@@ -112,7 +112,7 @@ async function close(req, res) {
     let initial_balance = data.initial_balance
     let current_balance = data.current_balance
     let private_key = data.private_key
-    let channel_id = data.channel_id || 1 
+    let channel_id = data.channel_id || 1
     let seed = await tonMnemonic.mnemonicToSeed(private_key.split(' '))
     let status = await close_channel(seed, new BN(initial_balance), new BN(current_balance), channel_id)
     if (status == 0) {
@@ -163,14 +163,25 @@ function tick(req, res) {
   try {
     let auth_key = req.body.access_key
 
-    // let balance_old = db.get_info_by_auth_key(auth_key)['current_balance']
-    // let balance_new = balance_old + ...
-    // db.set_current_balance_by_auth_key(auth_key, balance_new)
+    let data = db.get_info_by_auth_key(auth_key)
+    if (data != undefined) {
+      if (data.current_balance <= 0 || !data.active) {
+        res.status(400).json({result:"error", error: "balance is " + data.current_balance })
+        return
+      }
+      let balance_new = new BN(parseFloat(data.current_balance)).sub(toNano(config.PRICE_PER_REQUEST)).toString()
+      console.log("user", data.telegram_id, ": change balance to", balance_new)
+      db.set_current_balance_by_auth_key(auth_key, balance_new)
+      res.status(200).json({result: "ok"})
+    } else {
+      res.status(400).json({result:"error", error: "user not found"})
+      return
+    }
 
     // find user by access_key and change balance
-    res.status(400).json({result:"ok"})
+    
   } catch (err) {
-    console.log(err.message)
+    console.error(err)
     res.sendStatus(400)
   }
 }
