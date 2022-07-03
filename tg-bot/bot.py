@@ -8,6 +8,8 @@ my_bot = telebot.TeleBot("5444543656:AAFc6fjdan0_V77kiNRtNYD9jCkp5nxtXQE")
 
 port = 3000
 
+price = 0.01
+
 @my_bot.message_handler(commands=['start'])
 def send_welcome(message):    
     user_id = message.from_user.id
@@ -23,7 +25,7 @@ def send_welcome(message):
     elif result == 'true':
         # user exist
         my_bot.send_message(message.chat.id, text=MSG_FOUND_DB)
-        my_bot.send_message(message.chat.id, text=MSG_PRICING)
+        my_bot.send_message(message.chat.id, text=MSG_PRICING(price))
         msg = my_bot.send_message(message.chat.id, text=MSG_GET_PRICE)
         my_bot.register_next_step_handler(msg, get_prices)
 
@@ -41,7 +43,7 @@ def get_private_key(message):
 
 
     my_bot.send_message(message.chat.id, text=MSG_SUCCESS)
-    my_bot.send_message(message.chat.id, text=MSG_PRICING)
+    my_bot.send_message(message.chat.id, text=MSG_PRICING(price))
     msg = my_bot.send_message(message.chat.id, text=MSG_INIT_BALANCE)
     my_bot.register_next_step_handler(msg, get_prices)
 

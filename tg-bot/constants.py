@@ -1,9 +1,9 @@
-PRICE = 0.01
+
 
 MSG_WELCOME = "Hi!\nThis bot created for easier use private rpc nodes with Payment channels!"
 MSG_SECRET_KEY = "Please, text your secret phraze\n(words in order with separated by a spaces)"
 MSG_FOUND_DB = "I found your account in database!"
-MSG_PRICING =  f"Our pricing:\n{PRICE} TON per request"
+
 MSG_GET_PRICE = "Please, text how much TON you want to spend\ne.g.:0.1"
 MSG_ERROR = "Something went wrong, please send feedback to @YaStepan"
 MSG_SUCCESS = "All is good!"
@@ -20,6 +20,9 @@ def MSG_USE_URL(url):
 def MSG_STATISTICS(info):
     return f"Statiscis: {info}"
 
+def MSG_PRICING(price):
+    return f"Our pricing:\n{price} TON per request"
+
 MSG_HELP = """
 This bot created to provide developers possibility
 of using ***private rpc nodes*** easier.
@@ -28,3 +31,4 @@ for the convenience of working with rpc nodes.
 Comands:\n/start - Start\n/help - Help\n/finish - Finish
 /info - Get statistics while processing
 """
+
