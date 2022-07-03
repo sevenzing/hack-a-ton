@@ -19,7 +19,7 @@ https://youtu.be/7lAnbyJdpOA
 ### Our presentation:
 https://docs.google.com/presentation/d/16VD1B2ErnQHGFKwdtRGtPQh6I6Ye7_e-gFxXlw38svk/edit?usp=sharing
 
-###How to setup
+### How to setup
 required library: 
 ```
 apt-get install libpq-dev g++ make
