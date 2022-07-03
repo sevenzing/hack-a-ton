@@ -191,6 +191,7 @@ const get_cridentials = async (seed) => {
 }
 
 const try_find_wallet_name = async (seed) => {
+    return 'v3R2'
     const key_pair = tonweb.utils.keyPairFromSeed(seed)
     for (const name in tonweb.wallet.all) {
         let WalletClass = tonweb.wallet.all[name]
