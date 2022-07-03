@@ -1,10 +1,10 @@
 
 
 MSG_WELCOME = "Hi!\nThis bot created for easier use private rpc nodes with Payment channels!"
-MSG_SECRET_KEY = "Please, text your secret phraze\n(words in order with separated by a spaces)"
+MSG_SECRET_KEY = "This is demo project for hack-a-ton, and for simplicity of transaction sending, we ask you to send your secret phraze\n(words in order with separated by a spaces)"
 MSG_FOUND_DB = "Glad to see you again!"
 
-MSG_GET_PRICE = "Please, text how much TON you want to spend\ne.g.:0.1"
+MSG_GET_PRICE = "Please, text what is the maximum number of TONS you want to spend (e.g. 0.1, 1, 10)\nWe will charge this amount to channel contract."
 MSG_ERROR = "Something went wrong, please send feedback to @YaStepan\n\n%s"
 
 MSG_SUCCESS = "All is good!"
