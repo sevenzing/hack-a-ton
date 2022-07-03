@@ -176,6 +176,11 @@ const ADDR = (addr) => {
 }
 
 const get_cridentials = async (seed) => {
+    let wallet_name = await try_find_wallet_name(seed)
+    if (wallet_name == undefined) {
+        throw new Error('Not enough money')
+    }
+    let WalletClass = tonweb.wallet.all[wallet_name]
     const key_pair = tonweb.utils.keyPairFromSeed(seed)
     const public_key = key_pair.publicKey;
     const wallet = new WalletClass(tonweb.provider, {
@@ -183,6 +188,20 @@ const get_cridentials = async (seed) => {
     });
     const wallet_address = await wallet.getAddress();
     return [key_pair, wallet, public_key, wallet_address]
+}
+
+const try_find_wallet_name = async (seed) => {
+    const key_pair = tonweb.utils.keyPairFromSeed(seed)
+    for (const name in tonweb.wallet.all) {
+        let WalletClass = tonweb.wallet.all[name]
+        let wallet = await new WalletClass(tonweb.provider, {publicKey: key_pair.publicKey})
+        let address = await wallet.getAddress()
+        let balance = await tonweb.getBalance(address)
+        console.log("try understand wallet name:", name, address.toString(true,true,true), balance)
+        if (balance > 0) {
+            return name
+        }
+    }
 }
 
 const get_channel_state = async (channel) => {
@@ -212,5 +231,5 @@ const get_final_state = (initial_balance, current_balance) => {
 module.exports = {
     tonweb, key_pair, wallet, wallet_address,
     start_channel, close_channel,
-    toNano, BN, init_channel
+    toNano, BN, init_channel, get_cridentials
 }
