@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 const app = express()
 const port = 3000
 
-const Client = require('pg-native')
-const db_port = 5432;
+const db = require("./db_functions.js")
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -30,32 +29,11 @@ app.listen(port, () => {
   console.log(`Started server at http://localhost:${port}`);
 });
 
-
-function check_user_in_db_query(telegram_id) {
-  const client = new Client()
-  let connStr = 'postgresql://postgres:postgres@localhost:' + db_port + '/pg_db';
-  client.connectSync(connStr);
-  let result = true;
-  try {
-      res = client.querySync('SELECT COUNT(1) FROM rpc_db.user WHERE telegram_id = \'' + telegram_id + '\'');
-      if (res[0].count == 0) {
-          result = false;
-      }
-  } catch(err) {
-      console.log(err.message);
-      result = false;
-  }
-
-
-  client.end();
-  return result;
-}
-
 function check_user_in_db(req, res) {
   try {
     // check if user exist in db
     console.log("New user with tg_id=" + req.body.telegram_id);
-    if (check_user_in_db_query(req.body.telegram_id)) {
+    if (db.check_is_tg_id_exists(req.body.telegram_id)) {
       res.status(200).json({result:"true"});
     } else {
       res.status(200).json({result:"false"});
@@ -67,27 +45,13 @@ function check_user_in_db(req, res) {
   }
 }
 
-
-
-function save_user_in_db_query(telegram_id, private_key) {
-  const client = new Client()
-  let connStr = 'postgresql://postgres:postgres@localhost:' + db_port + '/pg_db';
-  client.connectSync(connStr);
-  try {
-      client.querySync('insert into rpc_db.user values (\'' + telegram_id + '\', null, \'' + private_key + '\')');
-  } catch(err) {
-      console.log(err.message);
-  }
-  client.end();
-  return result;
-}
-
 function save_user_in_db(req, res) {
   try {
     // save user
     console.log(req.body.telegram_id);
     console.log(req.body.private_key);
-    save_user_in_db_query(req.body.telegram_id, req.body.private_key);
+    db.set_private_key_by_tg_id(req.body.telegram_id, req.body.private_key);
+    db.set_active_by_tg_id(req.body.telegram_id, false);
     res.status(200).json({result:"ok"});
 
   } catch (err) {
@@ -102,6 +66,9 @@ function get_auth_key(req, res) {
 
     let auth_token = (Math.round(Math.random() * 0xfffff * 1000000)).toString(16);
     
+    // db.set_auth_key_by_tg_id(tg_id, auth_token);
+    // db.set_active_by_tg_id(tg_id, true);
+
     // console.log(auth_token);
     // try to start poolling user with tg_id
     // start_channel()
@@ -118,6 +85,8 @@ function get_auth_key(req, res) {
 function close(req, res) {
   try {
     let tg_id = req.body.telegram_id;
+
+    // db.set_active_by_tg_id(tg_id, false);
 
     // kill node and send contract
 
@@ -137,6 +106,8 @@ function set_balance(req, res) {
     let tg_id = req.body.telegram_id;
     let balance = req.body.balance;
 
+    // db.set_initial_balance_by_tg_id(tg_id, balance);
+
     // update db 
 
     res.status(200).json({result:"ok"});
@@ -150,6 +121,9 @@ function info(req, res) {
   try {
     let tg_id = req.body.telegram_id;
 
+
+    // let info = db.get_info_by_tg_id(tg_id);
+    // info['field name'] - field value
     // get info
 
     let money_spent = 10000.0 / 1000;
@@ -164,7 +138,11 @@ function info(req, res) {
 
 function tick(req, res) {
   try {
-    let tg_id = req.body.access_key;
+    let auth_key = req.body.access_key;
+
+    // let balance_old = db.get_info_by_auth_key(auth_key)['current_balance'];
+    // let balance_new = balance_old + ...;
+    // db.set_current_balance_by_auth_key(auth_key, balance_new);
 
     // find user by access_key and change balance
     res.status(200).json({result:"ok"});
