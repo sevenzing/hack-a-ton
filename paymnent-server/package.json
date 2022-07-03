@@ -2,7 +2,9 @@
   "dependencies": {
     "tonweb": "^0.0.50",
     "tonweb-mnemonic": "^1.0.1",
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "pg": "^8.7.3",
+    "pg-native": "^3.0.0"
   },
   "name": "hack_a_ton",
   "version": "1.0.0",

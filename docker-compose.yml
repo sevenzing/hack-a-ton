@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14.1
+    container_name: "postgres_db"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pg_db
+      - POSTGRES_PORT=5432
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+      - ./start.sql:/docker-entrypoint-initdb.d/start.sql
+    ports:
+      - "5432:5432"
+    restart: always
+#    env_file: # для хранения secrets правильнее использовать .env-файл
+#      - .env
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: "pgadmin"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    volumes:
+      - data_pgadmin:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:
+  data_pgadmin:

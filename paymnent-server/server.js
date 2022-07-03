@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const app = express()
 const port = 3000
 
+const Client = require('pg-native')
+const db_port = 5432;
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
@@ -27,13 +30,36 @@ app.listen(port, () => {
   console.log(`Started server at http://localhost:${port}`);
 });
 
+
+function check_user_in_db_query(telegram_id) {
+  const client = new Client()
+  let connStr = 'postgresql://postgres:postgres@localhost:' + db_port + '/pg_db';
+  client.connectSync(connStr);
+  let result = true;
+  try {
+      res = client.querySync('SELECT COUNT(1) FROM rpc_db.user WHERE telegram_id = \'' + telegram_id + '\'');
+      if (res[0].count == 0) {
+          result = false;
+      }
+  } catch(err) {
+      console.log(err.message);
+      result = false;
+  }
+
+
+  client.end();
+  return result;
+}
+
 function check_user_in_db(req, res) {
   try {
     // check if user exist in db
-
     console.log("New user with tg_id=" + req.body.telegram_id);
-    // res.status(200).json({result:"true"});
-    res.status(200).json({result:"false"});
+    if (check_user_in_db_query(req.body.telegram_id)) {
+      res.status(200).json({result:"true"});
+    } else {
+      res.status(200).json({result:"false"});
+    }
     // res.sendStatus(200);
   } catch (err) {
     console.log(err.message);
